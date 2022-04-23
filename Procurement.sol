@@ -24,8 +24,7 @@ contract TenderFactory {
     */
     function getDeployedTenders() public view returns(address[]){
         return deployedTenders;
-    }
-    
+    }   
 }
 
 contract Tender{
@@ -67,14 +66,17 @@ contract Tender{
     Bid public winner;
     uint public winIndex;
     
-    // Constructor function of the tender contract.
+    /* 
+        Constructor function of the tender contract.
+    */
     constructor (string description, address creator) public {
         manager = creator;
         data = description;
     }
 
-    /* This function returns the details of the bidder, bidAmount and bid(proposal)
-       only after the tender has been awarded, to ensure transparency in the system.
+    /* 
+        This function returns the details of the bidder, bidAmount and bid(proposal)
+        only after the tender has been awarded, to ensure transparency in the system.
     */
     function getBidSummary(uint index) public view returns (uint, uint, string) {
         return (
@@ -83,10 +85,10 @@ contract Tender{
             hiddenBids[index].bid
         );
     }
-    
-    
-    /* This function is used to let a bidder make a bid, it creates a temporary instance
-       of Bid and hiddenBid and initialised them and pushes them into the respective arrays.
+     
+    /* 
+        This function is used to let a bidder make a bid, it creates a temporary instance
+        of Bid and hiddenBid and initialised them and pushes them into the respective arrays.
     */
     function makeBid(uint bidAmount, string desc) public payable {
         require(!complete);
@@ -104,28 +106,36 @@ contract Tender{
         hiddenBids.push(newhiddenBid);
     }
 
-    
-    /* finalizeBid is used to award the bid by passing an argument of the index of the bid,
-       It is a payable function, the sender of the call passes some ether to the contract
-       the bidAmount is sent to the chosen bidder, and the balance is sent back to the 
-       manager of the tender.
+    /* 
+        finalizeBid is used to award the bid by passing an argument of the index of the bid.
     */
-    function finalizeBid(uint index) public  {
+    function finalizeBid(uint index) public payable {
         require(!complete);
         winner = bids[index];
         winIndex = index;
+        //send bid amount to winner and balance to manager
         complete = true;   
     }
 
+    /* 
+        getTenderSummary is used to get tender details
+    */
     function getTenderSummary() public view returns (address, string, uint) {
         return(manager,
         data,
         bids.length);
     }
+
+    /* 
+        getBidCount is used to get the number of bids for Tender
+    */
     function getBidCount() public view returns (uint) {
         return bids.length;
     }
 
+    /* 
+        getAllBids returns all the bids without bidder address
+    */
     function getAllBids() public view returns (hiddenBid[] memory){
       hiddenBid[] memory bidss = new hiddenBid[](hiddenBids.length);
       for (uint i = 0; i < hiddenBids.length; i++) {
